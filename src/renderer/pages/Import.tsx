@@ -89,8 +89,9 @@ export function ImportPage() {
       } else {
         addToast({ title: 'Error', description: result.error || 'Failed to read file', variant: 'error' })
       }
-    } catch (error) {
-      addToast({ title: 'Error', description: 'Failed to read file', variant: 'error' })
+    } catch (error: any) {
+      console.error('Import preview error:', error)
+      addToast({ title: 'Error', description: error?.message || 'Failed to read file', variant: 'error' })
     } finally {
       setIsLoading(false)
     }

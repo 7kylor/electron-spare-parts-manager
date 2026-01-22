@@ -3,8 +3,9 @@ import { getDatabase } from '../database'
 import { parts, categories, activityLogs, users, sessions } from '../database/schema'
 import { eq, and, gt } from 'drizzle-orm'
 import * as XLSX from 'xlsx'
-import { readFileSync, writeFileSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync } from 'fs'
 import { IPC_CHANNELS, type ImportResult, type Part } from '../../shared/types'
+import { logger } from '../logger'
 
 async function getCurrentUserId(): Promise<number | null> {
   if (!global.currentSessionToken) return null
@@ -35,6 +36,8 @@ export function registerImportExportHandlers(): void {
   // Import preview - show file dialog and return parsed data
   ipcMain.handle(IPC_CHANNELS.IMPORT_PREVIEW, async (): Promise<{ success: boolean; data?: any[]; columns?: string[]; error?: string }> => {
     try {
+      logger.info('Opening file dialog for Excel import...')
+      
       const result = await dialog.showOpenDialog({
         title: 'Import Excel File',
         filters: [
@@ -44,25 +47,56 @@ export function registerImportExportHandlers(): void {
       })
       
       if (result.canceled || !result.filePaths[0]) {
+        logger.info('File selection cancelled')
         return { success: false, error: 'No file selected' }
       }
       
       const filePath = result.filePaths[0]
-      const workbook = XLSX.readFile(filePath)
+      logger.info(`Selected file: ${filePath}`)
+      
+      // Check if file exists
+      if (!existsSync(filePath)) {
+        logger.error(`File not found: ${filePath}`)
+        return { success: false, error: 'File not found' }
+      }
+      
+      // Read file as buffer first for better compatibility
+      logger.info('Reading file buffer...')
+      const fileBuffer = readFileSync(filePath)
+      logger.info(`File buffer size: ${fileBuffer.length} bytes`)
+      
+      // Parse workbook from buffer
+      logger.info('Parsing Excel workbook...')
+      const workbook = XLSX.read(fileBuffer, { type: 'buffer' })
+      
+      if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+        logger.error('No sheets found in workbook')
+        return { success: false, error: 'Excel file has no sheets' }
+      }
+      
       const sheetName = workbook.SheetNames[0]
+      logger.info(`Using sheet: ${sheetName}`)
+      
       const sheet = workbook.Sheets[sheetName]
+      if (!sheet) {
+        logger.error('Sheet not found')
+        return { success: false, error: 'Could not read sheet' }
+      }
+      
       const data = XLSX.utils.sheet_to_json(sheet)
+      logger.info(`Parsed ${data.length} rows from Excel`)
       
       if (data.length === 0) {
         return { success: false, error: 'Excel file is empty' }
       }
       
       const columns = Object.keys(data[0] as object)
+      logger.info(`Columns found: ${columns.join(', ')}`)
       
       return { success: true, data, columns }
-    } catch (error) {
-      console.error('Import preview error:', error)
-      return { success: false, error: 'Failed to read Excel file' }
+    } catch (error: any) {
+      logger.error('Import preview error:', error.message, error.stack)
+      return { success: false, error: `Failed to read Excel file: ${error.message}` }
     }
   })
   
@@ -149,6 +183,7 @@ export function registerImportExportHandlers(): void {
           
           imported++
         } catch (rowError: any) {
+          logger.error(`Import row ${rowNum} error:`, rowError.message)
           errors.push(`Row ${rowNum}: ${rowError.message}`)
         }
       }
@@ -161,7 +196,7 @@ export function registerImportExportHandlers(): void {
       
       return { success: true, imported, errors, warnings }
     } catch (error: any) {
-      console.error('Import error:', error)
+      logger.error('Import error:', error.message, error.stack)
       return { success: false, imported: 0, errors: [error.message], warnings: [] }
     }
   })
@@ -169,6 +204,8 @@ export function registerImportExportHandlers(): void {
   // Export to Excel
   ipcMain.handle(IPC_CHANNELS.EXPORT_EXCEL, async (): Promise<{ success: boolean; filePath?: string; error?: string }> => {
     try {
+      logger.info('Starting Excel export...')
+      
       const userId = await getCurrentUserId()
       if (!userId) {
         return { success: false, error: 'Not authenticated' }
@@ -236,6 +273,8 @@ export function registerImportExportHandlers(): void {
       
       XLSX.writeFile(workbook, result.filePath)
       
+      logger.info(`Exported ${allParts.length} parts to ${result.filePath}`)
+      
       await db.insert(activityLogs).values({
         userId,
         action: 'exported',
@@ -244,7 +283,7 @@ export function registerImportExportHandlers(): void {
       
       return { success: true, filePath: result.filePath }
     } catch (error: any) {
-      console.error('Export error:', error)
+      logger.error('Export error:', error.message, error.stack)
       return { success: false, error: error.message }
     }
   })
