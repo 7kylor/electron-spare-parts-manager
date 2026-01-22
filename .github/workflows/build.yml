@@ -37,22 +37,19 @@ jobs:
       - name: Type check
         run: bun run typecheck
 
-      - name: Build application
-        run: bun run build
-
       - name: Build Electron app (macOS)
         if: matrix.os == 'macos-latest'
-        run: bun run build:mac
+        run: bun run build && electron-builder --mac --config --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
 
       - name: Build Electron app (Windows)
         if: matrix.os == 'windows-latest'
-        run: bun run build:win
+        run: bun run build && electron-builder --win --config --publish never
 
       - name: Build Electron app (Linux)
         if: matrix.os == 'ubuntu-latest'
-        run: bun run build:linux
+        run: bun run build && electron-builder --linux --config --publish never
 
       - name: Upload artifacts (macOS)
         if: matrix.os == 'macos-latest'
