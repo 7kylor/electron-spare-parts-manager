@@ -39,17 +39,17 @@ jobs:
 
       - name: Build Electron app (macOS)
         if: matrix.os == 'macos-latest'
-        run: bun run build && electron-builder --mac --config --publish never
+        run: bun run build && npx electron-builder --mac --config --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
 
       - name: Build Electron app (Windows)
         if: matrix.os == 'windows-latest'
-        run: bun run build && electron-builder --win --config --publish never
+        run: bun run build && npx electron-builder --win --config --publish never
 
       - name: Build Electron app (Linux)
         if: matrix.os == 'ubuntu-latest'
-        run: bun run build && electron-builder --linux --config --publish never
+        run: bun run build && npx electron-builder --linux --config --publish never
 
       - name: Upload artifacts (macOS)
         if: matrix.os == 'macos-latest'
