@@ -178,6 +178,24 @@ export function InventoryPage() {
     ...categories.map(c => ({ value: c.id.toString(), label: c.name }))
   ]
   
+  const perPageOptions = [
+    { value: '20', label: '20 per page' },
+    { value: '50', label: '50 per page' },
+    { value: '100', label: '100 per page' },
+    { value: '250', label: '250 per page' },
+    { value: '500', label: '500 per page' },
+    { value: '1000', label: '1000 per page' },
+    { value: 'all', label: 'Show all' }
+  ]
+  
+  const handlePerPageChange = (value: string) => {
+    if (value === 'all') {
+      setFilter({ limit: 99999, page: 1 })
+    } else {
+      setFilter({ limit: parseInt(value), page: 1 })
+    }
+  }
+  
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -391,11 +409,25 @@ export function InventoryPage() {
         </CardContent>
         
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t">
+        <div className="flex items-center justify-between px-6 py-4 border-t">
+          <div className="flex items-center gap-4">
             <p className="text-sm text-muted-foreground">
-              Page {currentPage} of {totalPages}
+              {totalParts > 0 ? (
+                <>
+                  Showing {Math.min((currentPage - 1) * (filter.limit || 20) + 1, totalParts)} - {Math.min(currentPage * (filter.limit || 20), totalParts)} of {totalParts}
+                </>
+              ) : (
+                'No results'
+              )}
             </p>
+            <Select
+              options={perPageOptions}
+              value={filter.limit === 99999 ? 'all' : (filter.limit?.toString() || '20')}
+              onChange={(e) => handlePerPageChange(e.target.value)}
+              className="w-36"
+            />
+          </div>
+          {totalPages > 1 && (
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
@@ -406,6 +438,9 @@ export function InventoryPage() {
                 <ChevronLeft className="h-4 w-4" />
                 Previous
               </Button>
+              <span className="text-sm text-muted-foreground px-2">
+                Page {currentPage} of {totalPages}
+              </span>
               <Button
                 variant="outline"
                 size="sm"
@@ -416,8 +451,8 @@ export function InventoryPage() {
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </Card>
       
       {/* Dialogs */}
