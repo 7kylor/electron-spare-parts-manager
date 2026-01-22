@@ -69,7 +69,7 @@ export function ImportPage() {
         
         // Auto-map common column names
         const newMapping = { ...mapping }
-        const columnLower = result.columns.map(c => c.toLowerCase())
+        const columnLower = result.columns.map((c: string) => c.toLowerCase())
         
         if (columnLower.includes('name')) newMapping.name = result.columns[columnLower.indexOf('name')]
         if (columnLower.includes('part name')) newMapping.name = result.columns[columnLower.indexOf('part name')]

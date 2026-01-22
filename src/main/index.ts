@@ -52,10 +52,6 @@ function createWindow(): void {
   mainWindow.webContents.on('render-process-gone', (_, details) => {
     logger.error('Renderer process gone:', details)
   })
-  
-  mainWindow.webContents.on('crashed', () => {
-    logger.error('Renderer process crashed')
-  })
 }
 
 // Initialize database and handlers
