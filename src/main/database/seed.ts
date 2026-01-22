@@ -7,6 +7,69 @@ function hashPassword(password: string): string {
   return createHash('sha256').update(password).digest('hex')
 }
 
+// Add missing categories to existing database
+export async function ensureCategories(): Promise<void> {
+  const db = getDatabase()
+  
+  const requiredCategories = [
+    // Mechanical
+    { name: 'Bolts', type: 'mechanical' as const, description: 'Various bolt sizes and types' },
+    { name: 'Nuts', type: 'mechanical' as const, description: 'Hex nuts, lock nuts, wing nuts' },
+    { name: 'Washers', type: 'mechanical' as const, description: 'Flat, spring, and lock washers' },
+    { name: 'Screws', type: 'mechanical' as const, description: 'Machine screws, wood screws, self-tapping' },
+    { name: 'Bearings', type: 'mechanical' as const, description: 'Ball bearings, roller bearings' },
+    { name: 'Gears', type: 'mechanical' as const, description: 'Spur gears, helical gears' },
+    { name: 'Springs', type: 'mechanical' as const, description: 'Compression, tension, torsion springs' },
+    { name: 'Seals', type: 'mechanical' as const, description: 'O-rings, gaskets, oil seals' },
+    { name: 'Pins', type: 'mechanical' as const, description: 'Dowel pins, roll pins, cotter pins' },
+    { name: 'Clips', type: 'mechanical' as const, description: 'Retaining clips, circlips, snap rings' },
+    { name: 'Chains', type: 'mechanical' as const, description: 'Roller chains, drive chains, chain links' },
+    
+    // Piping
+    { name: 'Pipes', type: 'piping' as const, description: 'Steel, PVC, copper pipes' },
+    { name: 'Valves', type: 'piping' as const, description: 'Ball valves, gate valves, check valves' },
+    { name: 'Fittings', type: 'piping' as const, description: 'Elbows, tees, couplings' },
+    { name: 'Clamps', type: 'piping' as const, description: 'Pipe clamps, hose clamps' },
+    { name: 'Hoses', type: 'piping' as const, description: 'Hydraulic, pneumatic, water hoses' },
+    { name: 'Flanges', type: 'piping' as const, description: 'Weld neck, slip-on, blind flanges' },
+    
+    // Electrical
+    { name: 'Electrical', type: 'electrical' as const, description: 'General electrical components and parts' },
+    { name: 'Wires', type: 'electrical' as const, description: 'Copper wires, cables' },
+    { name: 'Circuit Breakers', type: 'electrical' as const, description: 'MCBs, MCCBs, RCCBs' },
+    { name: 'Switches', type: 'electrical' as const, description: 'Toggle, push button, limit switches' },
+    { name: 'Relays', type: 'electrical' as const, description: 'Control relays, contactors' },
+    { name: 'Connectors', type: 'electrical' as const, description: 'Terminal blocks, wire connectors' },
+    { name: 'Fuses', type: 'electrical' as const, description: 'Cartridge, blade, resettable fuses' },
+    { name: 'Motors', type: 'electrical' as const, description: 'AC motors, DC motors, servo motors' },
+    
+    // Specialty
+    { name: 'General', type: 'specialty' as const, description: 'General purpose and miscellaneous parts' },
+    { name: 'Pumps', type: 'specialty' as const, description: 'Centrifugal, positive displacement pumps' },
+    { name: 'Hydraulics', type: 'specialty' as const, description: 'Hydraulic cylinders, power units' },
+    { name: 'Pneumatics', type: 'specialty' as const, description: 'Air cylinders, valves, FRLs' },
+    { name: 'Filters', type: 'specialty' as const, description: 'Oil, air, water filters' },
+    { name: 'Sensors', type: 'specialty' as const, description: 'Proximity, temperature, pressure sensors' },
+    { name: 'PLCs', type: 'specialty' as const, description: 'Programmable logic controllers' },
+    { name: 'Drives', type: 'specialty' as const, description: 'VFDs, servo drives' }
+  ]
+  
+  // Get existing categories
+  const existingCategories = await db.select().from(categories)
+  const existingNames = new Set(existingCategories.map(c => c.name.toLowerCase()))
+  
+  // Find missing categories
+  const missingCategories = requiredCategories.filter(
+    c => !existingNames.has(c.name.toLowerCase())
+  )
+  
+  if (missingCategories.length > 0) {
+    console.log(`Adding ${missingCategories.length} missing categories...`)
+    await db.insert(categories).values(missingCategories)
+    console.log(`Added categories: ${missingCategories.map(c => c.name).join(', ')}`)
+  }
+}
+
 export async function seedDatabase(): Promise<void> {
   const db = getDatabase()
   
@@ -55,6 +118,9 @@ export async function seedDatabase(): Promise<void> {
     { name: 'Gears', type: 'mechanical' as const, description: 'Spur gears, helical gears' },
     { name: 'Springs', type: 'mechanical' as const, description: 'Compression, tension, torsion springs' },
     { name: 'Seals', type: 'mechanical' as const, description: 'O-rings, gaskets, oil seals' },
+    { name: 'Pins', type: 'mechanical' as const, description: 'Dowel pins, roll pins, cotter pins' },
+    { name: 'Clips', type: 'mechanical' as const, description: 'Retaining clips, circlips, snap rings' },
+    { name: 'Chains', type: 'mechanical' as const, description: 'Roller chains, drive chains, chain links' },
     
     // Piping
     { name: 'Pipes', type: 'piping' as const, description: 'Steel, PVC, copper pipes' },
@@ -65,6 +131,7 @@ export async function seedDatabase(): Promise<void> {
     { name: 'Flanges', type: 'piping' as const, description: 'Weld neck, slip-on, blind flanges' },
     
     // Electrical
+    { name: 'Electrical', type: 'electrical' as const, description: 'General electrical components and parts' },
     { name: 'Wires', type: 'electrical' as const, description: 'Copper wires, cables' },
     { name: 'Circuit Breakers', type: 'electrical' as const, description: 'MCBs, MCCBs, RCCBs' },
     { name: 'Switches', type: 'electrical' as const, description: 'Toggle, push button, limit switches' },
@@ -74,6 +141,7 @@ export async function seedDatabase(): Promise<void> {
     { name: 'Motors', type: 'electrical' as const, description: 'AC motors, DC motors, servo motors' },
     
     // Specialty
+    { name: 'General', type: 'specialty' as const, description: 'General purpose and miscellaneous parts' },
     { name: 'Pumps', type: 'specialty' as const, description: 'Centrifugal, positive displacement pumps' },
     { name: 'Hydraulics', type: 'specialty' as const, description: 'Hydraulic cylinders, power units' },
     { name: 'Pneumatics', type: 'specialty' as const, description: 'Air cylinders, valves, FRLs' },

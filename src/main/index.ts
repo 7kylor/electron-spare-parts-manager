@@ -2,7 +2,7 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { initDatabase, closeDatabase } from './database'
-import { seedDatabase } from './database/seed'
+import { seedDatabase, ensureCategories } from './database/seed'
 import { registerAllHandlers } from './ipc'
 import electronUpdater from 'electron-updater'
 import { IPC_CHANNELS } from '../shared/types'
@@ -66,6 +66,9 @@ async function initialize(): Promise<void> {
     
     logger.info('Seeding database...')
     await seedDatabase()
+    
+    logger.info('Ensuring all categories exist...')
+    await ensureCategories()
     
     logger.info('Registering IPC handlers...')
     registerAllHandlers()
