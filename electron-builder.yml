@@ -1,0 +1,63 @@
+appId: com.sparepartsmanager.app
+productName: Spare Parts Manager
+directories:
+  buildResources: resources
+  output: dist
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml,bun.lockb}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - '!{drizzle.config.ts,postcss.config.js,tailwind.config.ts}'
+asarUnpack:
+  - resources/**
+  - node_modules/better-sqlite3/**
+mac:
+  entitlementsInherit: resources/entitlements.mac.plist
+  extendInfo:
+    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
+    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+    - target: zip
+      arch:
+        - x64
+        - arm64
+  artifactName: ${name}-${version}-${os}-${arch}.${ext}
+dmg:
+  artifactName: ${name}-${version}-${os}-${arch}.${ext}
+win:
+  executableName: SparePartsManager
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+nsis:
+  artifactName: ${name}-${version}-setup.${ext}
+  shortcutName: Spare Parts Manager
+  uninstallDisplayName: Spare Parts Manager
+  createDesktopShortcut: always
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+linux:
+  target:
+    - AppImage
+    - deb
+  maintainer: sparepartsmanager.com
+  category: Utility
+  artifactName: ${name}-${version}-${os}-${arch}.${ext}
+appImage:
+  artifactName: ${name}-${version}-${os}-${arch}.${ext}
+npmRebuild: true
+publish:
+  provider: github
+  owner: 7kylor
+  repo: electron-spare-parts-manager

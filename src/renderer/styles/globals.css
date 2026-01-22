@@ -1,0 +1,132 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: oklch(100% 0 0);
+  --color-foreground: oklch(14.08% 0.004 285.82);
+  --color-card: oklch(100% 0 0);
+  --color-card-foreground: oklch(14.08% 0.004 285.82);
+  --color-popover: oklch(100% 0 0);
+  --color-popover-foreground: oklch(14.08% 0.004 285.82);
+  --color-primary: oklch(20.47% 0.006 285.88);
+  --color-primary-foreground: oklch(98.51% 0.001 285.84);
+  --color-secondary: oklch(96.76% 0.001 285.81);
+  --color-secondary-foreground: oklch(20.47% 0.006 285.88);
+  --color-muted: oklch(96.76% 0.001 285.81);
+  --color-muted-foreground: oklch(55.19% 0.014 285.94);
+  --color-accent: oklch(96.76% 0.001 285.81);
+  --color-accent-foreground: oklch(20.47% 0.006 285.88);
+  --color-destructive: oklch(57.71% 0.215 27.33);
+  --color-destructive-foreground: oklch(98.51% 0.001 285.84);
+  --color-border: oklch(91.97% 0.004 285.84);
+  --color-input: oklch(91.97% 0.004 285.84);
+  --color-ring: oklch(14.08% 0.004 285.82);
+  
+  /* Status colors */
+  --color-success: oklch(72% 0.19 142.5);
+  --color-success-foreground: oklch(100% 0 0);
+  --color-warning: oklch(79.5% 0.155 70);
+  --color-warning-foreground: oklch(25% 0.05 70);
+  --color-danger: oklch(57.71% 0.215 27.33);
+  --color-danger-foreground: oklch(100% 0 0);
+  
+  --radius: 0.5rem;
+  
+  --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+.dark {
+  --color-background: oklch(14.08% 0.004 285.82);
+  --color-foreground: oklch(98.51% 0.001 285.84);
+  --color-card: oklch(14.08% 0.004 285.82);
+  --color-card-foreground: oklch(98.51% 0.001 285.84);
+  --color-popover: oklch(14.08% 0.004 285.82);
+  --color-popover-foreground: oklch(98.51% 0.001 285.84);
+  --color-primary: oklch(98.51% 0.001 285.84);
+  --color-primary-foreground: oklch(20.47% 0.006 285.88);
+  --color-secondary: oklch(26.89% 0.006 285.89);
+  --color-secondary-foreground: oklch(98.51% 0.001 285.84);
+  --color-muted: oklch(26.89% 0.006 285.89);
+  --color-muted-foreground: oklch(70.67% 0.01 285.88);
+  --color-accent: oklch(26.89% 0.006 285.89);
+  --color-accent-foreground: oklch(98.51% 0.001 285.84);
+  --color-destructive: oklch(57.71% 0.215 27.33);
+  --color-destructive-foreground: oklch(98.51% 0.001 285.84);
+  --color-border: oklch(26.89% 0.006 285.89);
+  --color-input: oklch(26.89% 0.006 285.89);
+  --color-ring: oklch(83.91% 0.003 285.84);
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-muted-foreground);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-foreground);
+}
+
+/* Search highlight */
+.search-highlight {
+  background-color: oklch(85% 0.2 90);
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+.dark .search-highlight {
+  background-color: oklch(50% 0.2 90);
+}
+
+/* Drag region for macOS title bar */
+.drag-region {
+  -webkit-app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+/* Animation utilities */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { 
+    opacity: 0; 
+    transform: translateY(10px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
